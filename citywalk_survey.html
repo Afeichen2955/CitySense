@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CityCure 街道微观体验采集</title>
+    <style>
+        :root {
+            --primary: #00E5FF; /* PolyU Cyan */
+            --bg: #121212;
+            --card-bg: #1E1E1E;
+            --text: #E0E0E0;
+            --text-dim: #A0A0A0;
+            --slider-track: #333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 80px; /* Space for button */
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        p.subtitle {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        /* Question Group */
+        .q-group {
+            margin-bottom: 25px;
+        }
+
+        .q-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .q-tag {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Dynamic Description Text */
+        .desc-text {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            background: #252525;
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            min-height: 40px; /* Prevent jumping */
+            transition: color 0.2s;
+        }
+        
+        .desc-text.highlight {
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        /* Custom Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin: 10px 0;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Slider Track */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: var(--slider-track);
+            border-radius: 4px;
+        }
+        
+        /* Slider Thumb */
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px; /* Center on track */
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        /* Value Display */
+        .val-display {
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Submit Button */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            background: linear-gradient(to top, var(--bg) 80%, transparent);
+            padding-bottom: 20px;
+            padding-top: 20px;
+        }
+
+        button.submit-btn {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
+            width: 100%;
+            max-width: 400px;
+            cursor: pointer;
+        }
+
+        button.submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Input for Location */
+        .input-text {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Z-Score Slider specific */
+        .z-slider::-webkit-slider-thumb {
+            background: #ff0055; /* Different color for Z */
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CityCure 街道微观体验采集</h1>
+    <p class="subtitle">滑动滑块以匹配最符合的描述 (-3 至 +3)</p>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="icon">📍</span>
+            <span class="card-title">当前位置</span>
+        </div>
+        <input type="text" id="locID" class="input-text" placeholder="例如: Point-01 或 K11门口">
+    </div>
+
+    <div class="card" style="border-color: #ff0055;">
+        <div class="card-header">
+            <span class="icon">🧠</span>
+            <span class="card-title">Z值: 直觉整体感受</span>
+        </div>
+        <div class="q-group">
+            <div class="q-label">
+                <span>此刻，这里让您感到放松/治愈吗？</span>
+                <span id="val_Z" class="val-display" style="color:#ff0055">50</span>
+            </div>
+            <input type="range" min="0" max="100" value="50" class="z-slider" oninput="updateZ(this.value)">
+            <div class="desc-text" id="desc_Z">
+                50: 中性，无功无过
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="icon">🌿</span>
+            <span class="card-title">S1 自然景观 (Natural)</span>
+        </div>
+        
+        <div class="q-group">
+            <div class="q-label">
+                <span>绿化存在度 (E)</span>
+                <span class="q-tag">E: Existence</span>
+                <span id="val_S1_E" class="val-display">0</span>
+            </div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S1_E', this.value)">
+            <div class="desc-text" id="desc_S1_E">0 (一般): 植物是活的，但长势普通，修剪一般。</div>
+        </div>
+
+        <div class="q-group">
+            <div class="q-label">
+                <span>植被健康度 (Q)</span>
+                <span class="q-tag">Q: Quality</span>
+                <span id="val_S1_Q" class="val-display">0</span>
+            </div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S1_Q', this.value)">
+            <div class="desc-text" id="desc_S1_Q">0 (一般): 植物是活的，无明显病虫害但无功无过。</div>
+        </div>
+
+        <div class="q-group">
+            <div class="q-label">
+                <span>降温与治愈感 (X)</span>
+                <span class="q-tag">X: Experience</span>
+                <span id="val_S1_X" class="val-display">0</span>
+            </div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S1_X', this.value)">
+            <div class="desc-text" id="desc_S1_X">0 (无感): 不觉得热，也没有特别舒服。</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="icon">🏗️</span>
+            <span class="card-title">S2 空间结构 (Spatial)</span>
+        </div>
+        
+        <div class="q-group">
+            <div class="q-label">
+                <span>空间围合感 (E)</span>
+                <span class="q-tag">E: Enclosure</span>
+                <span id="val_S2_E" class="val-display">0</span>
+            </div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S2_E', this.value)">
+            <div class="desc-text" id="desc_S2_E">0 (中等): 正常的街道宽高比 (D/H≈1)，有明确界面。</div>
+        </div>
+
+        <div class="q-group">
+            <div class="q-label">
+                <span>可读与秩序感 (Q)</span>
+                <span class="q-tag">Q: Legibility</span>
+                <span id="val_S2_Q" class="val-display">0</span>
+            </div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S2_Q', this.value)">
+            <div class="desc-text" id="desc_S2_Q">0 (整洁): 道路平整，分区基本清晰，但缺乏设计感。</div>
+        </div>
+
+        <div class="q-group">
+            <div class="q-label">
+                <span>行走流畅度 (X)</span>
+                <span class="q-tag">X: Fluency</span>
+                <span id="val_S2_X" class="val-display">0</span>
+            </div>
+            <input type="range" min="-3" max="3" step="1"
