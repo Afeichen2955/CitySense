@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CityCure 街道微观体验采集</title>
+    <title>CitySense 街道微观体验采集 v2.0</title>
     <style>
         :root {
             --primary: #00E5FF; /* PolyU Cyan */
+            --accent: #FF0055; /* Z-score Red */
             --bg: #121212;
             --card-bg: #1E1E1E;
             --text: #E0E0E0;
@@ -19,33 +20,21 @@
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
-            padding-bottom: 80px; /* Space for button */
+            padding: 15px;
+            padding-bottom: 100px;
         }
 
-        h1 {
-            font-size: 1.2rem;
-            color: var(--primary);
-            margin-bottom: 5px;
-            text-align: center;
-        }
-
-        p.subtitle {
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
+        h1 { font-size: 1.2rem; color: var(--primary); text-align: center; margin: 10px 0; }
+        p.subtitle { text-align: center; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 20px; }
 
         /* Card Style */
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            padding: 15px;
+            margin-bottom: 15px;
             border: 1px solid #333;
+            position: relative;
         }
 
         .card-header {
@@ -53,90 +42,51 @@
             align-items: center;
             margin-bottom: 15px;
             border-bottom: 1px solid #333;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
-        .icon {
-            font-size: 1.5rem;
-            margin-right: 10px;
-        }
+        .icon { font-size: 1.4rem; margin-right: 8px; }
+        .card-title { font-weight: bold; font-size: 1rem; color: #fff; }
 
-        .card-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #fff;
+        /* Photo Upload Styling */
+        .photo-upload-box {
+            border: 2px dashed #444;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            position: relative;
+            overflow: hidden;
         }
+        .photo-upload-box:active { border-color: var(--primary); }
+        .photo-preview {
+            max-width: 100%;
+            max-height: 200px;
+            display: none;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        input[type="file"] { display: none; }
 
         /* Question Group */
-        .q-group {
-            margin-bottom: 25px;
-        }
-
+        .q-group { margin-bottom: 25px; }
+        
         .q-label {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             font-size: 0.9rem;
-            margin-bottom: 10px;
-            color: var(--text);
+            margin-bottom: 8px;
         }
 
         .q-tag {
-            background: #333;
+            background: #2a2a2a;
             padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
             color: var(--primary);
-            font-weight: bold;
-        }
-
-        /* Dynamic Description Text */
-        .desc-text {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            background: #252525;
-            padding: 8px;
-            border-radius: 6px;
-            margin-top: 8px;
-            min-height: 40px; /* Prevent jumping */
-            transition: color 0.2s;
-        }
-        
-        .desc-text.highlight {
-            color: var(--primary);
-            border: 1px solid var(--primary);
-        }
-
-        /* Custom Slider */
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-            margin: 10px 0;
-        }
-
-        input[type=range]:focus {
-            outline: none;
-        }
-
-        /* Slider Track */
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            cursor: pointer;
-            background: var(--slider-track);
-            border-radius: 4px;
-        }
-        
-        /* Slider Thumb */
-        input[type=range]::-webkit-slider-thumb {
-            height: 24px;
-            width: 24px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            -webkit-appearance: none;
-            margin-top: -8px; /* Center on track */
-            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+            margin-left: 5px;
         }
 
         /* Value Display */
@@ -145,157 +95,416 @@
             font-size: 1.1rem;
             color: var(--primary);
             font-weight: bold;
+            min-width: 30px;
+            text-align: right;
         }
+
+        /* Description Box */
+        .desc-text {
+            font-size: 0.8rem;
+            color: #ccc;
+            background: #252525;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 5px;
+            line-height: 1.4;
+            border-left: 3px solid #444;
+            transition: all 0.2s;
+        }
+        .desc-text.highlight { border-left-color: var(--primary); background: #2a2a2a; }
+
+        /* Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin: 10px 0;
+        }
+        input[type=range]:focus { outline: none; }
+        
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: var(--slider-track);
+            border-radius: 3px;
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px;
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+            border: 2px solid #fff;
+        }
+
+        /* Z-Slider Specific */
+        .z-slider::-webkit-slider-thumb { background: var(--accent); box-shadow: 0 0 8px rgba(255, 0, 85, 0.4); }
 
         /* Submit Button */
         .fab-container {
             position: fixed;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
+            bottom: 0; left: 0; width: 100%;
+            padding: 15px 20px 25px;
+            background: linear-gradient(to top, rgba(18,18,18,1) 85%, transparent);
+            box-sizing: border-box;
+            z-index: 100;
             display: flex;
-            justify-content: center;
-            padding: 0 20px;
-            box-sizing: border-box;
-            background: linear-gradient(to top, var(--bg) 80%, transparent);
-            padding-bottom: 20px;
-            padding-top: 20px;
+            gap: 10px;
         }
-
-        button.submit-btn {
-            background-color: var(--primary);
-            color: #000;
+        
+        button {
             border: none;
-            padding: 15px 40px;
             border-radius: 30px;
-            font-size: 1.1rem;
+            padding: 14px;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
-            width: 100%;
-            max-width: 400px;
-            cursor: pointer;
-        }
-
-        button.submit-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Input for Location */
-        .input-text {
-            width: 100%;
-            padding: 10px;
-            background: #333;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 6px;
             font-size: 1rem;
-            box-sizing: border-box;
+            cursor: pointer;
+            flex: 1;
         }
 
-        /* Z-Score Slider specific */
-        .z-slider::-webkit-slider-thumb {
-            background: #ff0055; /* Different color for Z */
-            box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+        .submit-btn { background: var(--primary); color: #000; box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3); }
+        .reset-btn { background: #333; color: #fff; flex: 0.3; }
+
+        .input-text {
+            width: 100%; padding: 10px;
+            background: #333; border: 1px solid #444;
+            color: white; border-radius: 6px;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
 
-    <h1>CityCure 街道微观体验采集</h1>
-    <p class="subtitle">滑动滑块以匹配最符合的描述 (-3 至 +3)</p>
+    <h1>CityCure 采集 v2.0</h1>
+    <p class="subtitle">滑动以匹配最精准的描述 (-3 至 +3)</p>
 
     <div class="card">
         <div class="card-header">
-            <span class="icon">📍</span>
-            <span class="card-title">当前位置</span>
+            <span class="icon">📸</span>
+            <span class="card-title">位置与存证</span>
         </div>
-        <input type="text" id="locID" class="input-text" placeholder="例如: Point-01 或 K11门口">
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="locID" class="input-text" placeholder="输入编号">
+        </div>
+        
+        <label class="photo-upload-box" for="cameraInput">
+            <span style="font-size:1.5rem">📷</span><br>
+            <span style="font-size:0.8rem; color:#aaa">点击拍照或上传图片</span>
+            <img id="preview" class="photo-preview">
+        </label>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="previewImage(this)">
     </div>
 
-    <div class="card" style="border-color: #ff0055;">
+    <div class="card" style="border-top: 3px solid var(--accent);">
         <div class="card-header">
             <span class="icon">🧠</span>
-            <span class="card-title">Z值: 直觉整体感受</span>
+            <span class="card-title">Z值: 直觉整体评分</span>
         </div>
         <div class="q-group">
             <div class="q-label">
-                <span>此刻，这里让您感到放松/治愈吗？</span>
-                <span id="val_Z" class="val-display" style="color:#ff0055">50</span>
+                <span>直觉感受</span>
+                <span id="val_Z" class="val-display" style="color:var(--accent)">50</span>
             </div>
             <input type="range" min="0" max="100" value="50" class="z-slider" oninput="updateZ(this.value)">
-            <div class="desc-text" id="desc_Z">
-                50: 中性，无功无过
-            </div>
+            <div class="desc-text" id="desc_Z">50: 无功无过，中性</div>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <span class="icon">🌿</span>
-            <span class="card-title">S1 自然景观 (Natural)</span>
-        </div>
+        <div class="card-header"><span class="icon">🌿</span><span class="card-title">S1 自然景观</span></div>
         
         <div class="q-group">
-            <div class="q-label">
-                <span>绿化存在度 (E)</span>
-                <span class="q-tag">E: Existence</span>
-                <span id="val_S1_E" class="val-display">0</span>
-            </div>
+            <div class="q-label"><span>绿化存在度 (E)</span><span id="val_S1_E" class="val-display">0</span></div>
             <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S1_E', this.value)">
-            <div class="desc-text" id="desc_S1_E">0 (一般): 植物是活的，但长势普通，修剪一般。</div>
+            <div class="desc-text" id="desc_S1_E">0: 中等...</div>
         </div>
-
         <div class="q-group">
-            <div class="q-label">
-                <span>植被健康度 (Q)</span>
-                <span class="q-tag">Q: Quality</span>
-                <span id="val_S1_Q" class="val-display">0</span>
-            </div>
+            <div class="q-label"><span>生态健康度 (Q)</span><span id="val_S1_Q" class="val-display">0</span></div>
             <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S1_Q', this.value)">
-            <div class="desc-text" id="desc_S1_Q">0 (一般): 植物是活的，无明显病虫害但无功无过。</div>
+            <div class="desc-text" id="desc_S1_Q">0: 一般...</div>
         </div>
-
         <div class="q-group">
-            <div class="q-label">
-                <span>降温与治愈感 (X)</span>
-                <span class="q-tag">X: Experience</span>
-                <span id="val_S1_X" class="val-display">0</span>
-            </div>
+            <div class="q-label"><span>降温治愈感 (X)</span><span id="val_S1_X" class="val-display">0</span></div>
             <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S1_X', this.value)">
-            <div class="desc-text" id="desc_S1_X">0 (无感): 不觉得热，也没有特别舒服。</div>
+            <div class="desc-text" id="desc_S1_X">0: 无感...</div>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <span class="icon">🏗️</span>
-            <span class="card-title">S2 空间结构 (Spatial)</span>
-        </div>
+        <div class="card-header"><span class="icon">🏗️</span><span class="card-title">S2 空间结构</span></div>
         
         <div class="q-group">
-            <div class="q-label">
-                <span>空间围合感 (E)</span>
-                <span class="q-tag">E: Enclosure</span>
-                <span id="val_S2_E" class="val-display">0</span>
-            </div>
+            <div class="q-label"><span>界面清晰度 (E)</span><span id="val_S2_E" class="val-display">0</span></div>
             <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S2_E', this.value)">
-            <div class="desc-text" id="desc_S2_E">0 (中等): 正常的街道宽高比 (D/H≈1)，有明确界面。</div>
+            <div class="desc-text" id="desc_S2_E">0: 中等...</div>
         </div>
-
         <div class="q-group">
-            <div class="q-label">
-                <span>可读与秩序感 (Q)</span>
-                <span class="q-tag">Q: Legibility</span>
-                <span id="val_S2_Q" class="val-display">0</span>
-            </div>
+            <div class="q-label"><span>空间秩序感 (Q)</span><span id="val_S2_Q" class="val-display">0</span></div>
             <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S2_Q', this.value)">
-            <div class="desc-text" id="desc_S2_Q">0 (整洁): 道路平整，分区基本清晰，但缺乏设计感。</div>
+            <div class="desc-text" id="desc_S2_Q">0: 整洁...</div>
         </div>
-
         <div class="q-group">
-            <div class="q-label">
-                <span>行走流畅度 (X)</span>
-                <span class="q-tag">X: Fluency</span>
-                <span id="val_S2_X" class="val-display">0</span>
-            </div>
-            <input type="range" min="-3" max="3" step="1"
+            <div class="q-label"><span>开敞通畅感 (X)</span><span id="val_S2_X" class="val-display">0</span></div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S2_X', this.value)">
+            <div class="desc-text" id="desc_S2_X">0: 一般...</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><span class="icon">🎨</span><span class="card-title">S3 美学特征</span></div>
+        
+        <div class="q-group">
+            <div class="q-label"><span>视觉丰富度 (E)</span><span id="val_S3_E" class="val-display">0</span></div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S3_E', this.value)">
+            <div class="desc-text" id="desc_S3_E">0: 普通...</div>
+        </div>
+        <div class="q-group">
+            <div class="q-label"><span>工艺协调性 (Q)</span><span id="val_S3_Q" class="val-display">0</span></div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S3_Q', this.value)">
+            <div class="desc-text" id="desc_S3_Q">0: 常规...</div>
+        </div>
+        <div class="q-group">
+            <div class="q-label"><span>视觉愉悦感 (X)</span><span id="val_S3_X" class="val-display">0</span></div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S3_X', this.value)">
+            <div class="desc-text" id="desc_S3_X">0: 无感...</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><span class="icon">🪑</span><span class="card-title">S4 社会可供性</span></div>
+        
+        <div class="q-group">
+            <div class="q-label"><span>设施密度 (E)</span><span id="val_S4_E" class="val-display">0</span></div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S4_E', this.value)">
+            <div class="desc-text" id="desc_S4_E">0: 中等...</div>
+        </div>
+        <div class="q-group">
+            <div class="q-label"><span>人体工学 (Q)</span><span id="val_S4_Q" class="val-display">0</span></div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S4_Q', this.value)">
+            <div class="desc-text" id="desc_S4_Q">0: 可用...</div>
+        </div>
+        <div class="q-group">
+            <div class="q-label"><span>停留意愿 (X)</span><span id="val_S4_X" class="val-display">0</span></div>
+            <input type="range" min="-3" max="3" step="1" value="0" oninput="updateDesc('S4_X', this.value)">
+            <div class="desc-text" id="desc_S4_X">0: 一般...</div>
+        </div>
+    </div>
+
+    <div class="fab-container">
+        <button class="reset-btn" onclick="resetForm()">重置</button>
+        <button class="submit-btn" onclick="exportData()">复制数据</button>
+    </div>
+
+    <script>
+        // === 核心数据字典：定义每一个分值的具体含义 ===
+        const defs = {
+            // --- S1 自然景观 ---
+            S1_E: {
+                "-3": "极度缺失: 视野几乎全是硬质铺装/建筑/天空，绿色占比<5%",
+                "-2": "严重缺乏: 仅有零星盆栽或极细小的树，绿色占比5-10%",
+                "-1": "少: 行道树不连续或冠幅很小，绿色占比10-15%",
+                "0": "中等: 连续行道树或草坪，能感受到绿意，占比15-30%",
+                "1": "较多: 有成片树荫或花坛，视觉舒适，占比30-45%",
+                "2": "丰富: 多层次绿化(乔灌草)，有大树，占比45-60%",
+                "3": "极度丰富: 满眼绿色，树冠郁闭或有垂直绿化，占比>60%"
+            },
+            S1_Q: {
+                "-3": "极差: 植物枯死、大面积黄土裸露、杂草丛生",
+                "-2": "差: 有明显病虫害，枝叶残缺，维护缺失",
+                "-1": "较差: 植物虽活但长势弱，看起来灰头土脸",
+                "0": "一般: 植物健康但修剪普通，无功无过",
+                "1": "较好: 植物叶片有光泽，无枯枝",
+                "2": "好: 修剪整齐，搭配美观，生长旺盛",
+                "3": "极好: 精品园艺，层次分明，色彩鲜艳，维护极佳"
+            },
+            S1_X: {
+                "-3": "极度难受: 暴晒、闷热、无遮挡，想立刻逃离",
+                "-2": "难受: 阳光刺眼，感觉燥热",
+                "-1": "微不适: 稍显闷热或自然气息不足",
+                "0": "无感: 不觉得热，也没有特别清凉",
+                "1": "微舒适: 有树荫，偶有微风",
+                "2": "舒适: 凉爽，空气清新，愿意深呼吸",
+                "3": "极度治愈: 被自然包裹，身心彻底放松，完全隔绝城市喧嚣"
+            },
+
+            // --- S2 空间结构 ---
+            S2_E: {
+                "-3": "极弱/荒芜: 巨大空旷广场或荒地，无任何空间边界感",
+                "-2": "弱: 街道过宽，建筑退后极远，视线无处着落",
+                "-1": "较弱: 界面断续，空间松散",
+                "0": "中等: 正常的街道高宽比(D/H≈1)，有明确界面",
+                "1": "较强: 街道界面连续，有一定围合感",
+                "2": "强: 空间紧凑，有行道树或骑楼形成明确空间感",
+                "3": "极强/包裹: 窄巷、连廊或茂密树冠形成的强烈包裹空间"
+            },
+            S2_Q: {
+                "-3": "极度混乱: 违章搭建、垃圾堆积、人车严重混行",
+                "-2": "混乱: 电动车乱停占道，设施破损严重",
+                "-1": "较乱: 地面有污渍或破损，偶尔有障碍物",
+                "0": "一般: 道路平整，基本整洁，无明显设计",
+                "1": "较好: 铺装完好，有人车分流措施",
+                "2": "有序: 铺装精致，街道家具排列整齐",
+                "3": "极度有序: 国际级街道设计，导视清晰，无任何视觉干扰"
+            },
+            S2_X: {
+                "-3": "极度压抑/拥堵: 寸步难行，或被高楼压迫感极强",
+                "-2": "压抑: 需要频繁避让障碍物，或感到局促",
+                "-1": "微不适: 行走不够顺畅",
+                "0": "一般: 正常通行，无特殊感受",
+                "1": "微顺畅: 视野开阔，路面好走",
+                "2": "顺畅: 空间尺度宜人，步伐轻快",
+                "3": "极度流畅/开阔: 空间流动感极佳，行随意动"
+            },
+
+            // --- S3 美学特征 ---
+            S3_E: {
+                "-3": "极度贫乏: 只有大白墙、水泥地，无任何色彩/装饰",
+                "-2": "贫乏: 缺乏变化，视觉单调枯燥",
+                "-1": "较少: 只有功能性设施(路灯/栏杆)",
+                "0": "中等: 普通店招、常规城市色彩",
+                "1": "丰富: 有特色橱窗、霓虹灯或装饰立面",
+                "2": "强烈: 有艺术装置、壁画或复杂建筑纹理",
+                "3": "极度强烈: 视觉信息爆炸，充满艺术细节或强烈色彩冲击"
+            },
+            S3_Q: {
+                "-3": "极度廉价/冲突: 材质低劣(塑料/喷绘)，配色极度刺眼/土气",
+                "-2": "廉价: 掉漆、生锈、污损明显",
+                "-1": "较差: 风格不统一，略显杂乱",
+                "0": "常规: 材质完好，设计平庸，无功无过",
+                "1": "较好: 材质有质感，配色和谐",
+                "2": "精致: 使用石材/原木等高级材料，做工精细",
+                "3": "极度精致/艺术: 艺术品级工艺，风格高度统一，极具美感"
+            },
+            S3_X: {
+                "-3": "极度丑陋: 视觉污染严重，看着头晕/心烦",
+                "-2": "丑陋: 杂乱无章，想移开视线",
+                "-1": "微不适: 看着不顺眼",
+                "0": "无感: 看了就忘，无心理波澜",
+                "1": "微愉悦: 看着整洁舒适",
+                "2": "愉悦: 有吸引眼球的亮点，愿意多看两眼",
+                "3": "极度愉悦: 视觉盛宴，充满惊喜，想拍照留念"
+            },
+
+            // --- S4 社会可供性 ---
+            S4_E: {
+                "-3": "完全排斥: 只有车道，或安装防坐钉/栏杆，禁止停留",
+                "-2": "严重缺乏: 仅作为过道，没有任何设施",
+                "-1": "少: 偶尔有栏杆或台阶可以勉强靠一下",
+                "0": "中等: 有零星石墩、花坛边缘可以坐",
+                "1": "较多: 沿途有几张长椅或路边摊位",
+                "2": "丰富: 有连续的休息区、外摆座椅",
+                "3": "极度丰富: 专门的活动广场、游乐设施，鼓励各种活动"
+            },
+            S4_Q: {
+                "-3": "完全不可用: 椅子在垃圾桶旁/积水/断裂/极脏",
+                "-2": "难用: 没有任何遮蔽，暴晒或淋雨，材质冰冷",
+                "-1": "勉强可用: 尺寸不合理(太高/太低/太窄)",
+                "0": "可用: 普通石凳/木椅，无靠背，能坐但不久",
+                "1": "较好: 位置合理，相对干净",
+                "2": "舒适: 有靠背扶手，材质舒适，朝向风景",
+                "3": "极度舒适: 人体工学设计，冬暖夏凉，维护极度干净"
+            },
+            S4_X: {
+                "-3": "极度不安/尴尬: 感觉有人监视，或车流贴身而过，极不安全",
+                "-2": "想离开: 氛围冷漠或嘈杂，不想多待",
+                "-1": "微尴尬: 停留显得突兀",
+                "0": "一般: 不排斥停留，但也没理由待着",
+                "1": "微安适: 可以在这里回个消息",
+                "2": "安适: 愿意坐下来喝杯咖啡或发呆",
+                "3": "极度归属感: 像自家客厅一样自在，充满人情味"
+            }
+        };
+
+        // 初始化
+        window.onload = function() {
+            // 初始化所有描述
+            Object.keys(defs).forEach(key => updateDesc(key, 0));
+        };
+
+        // 更新Z值
+        function updateZ(val) {
+            document.getElementById("val_Z").innerText = val;
+            let text = val < 40 ? "令人压抑" : (val < 70 ? "中性无感" : "令人治愈");
+            document.getElementById("desc_Z").innerText = `${val}: ${text}`;
+        }
+
+        // 更新通用描述
+        function updateDesc(key, val) {
+            // 显示数字 + 号
+            let displayVal = val > 0 ? "+" + val : val;
+            document.getElementById("val_" + key).innerText = displayVal;
+            
+            // 查找定义
+            let text = defs[key][val] || "未知描述";
+            
+            // UI反馈
+            let descEl = document.getElementById("desc_" + key);
+            descEl.innerText = text;
+            descEl.classList.add("highlight");
+            
+            // 移除高亮动画
+            clearTimeout(descEl.timer);
+            descEl.timer = setTimeout(() => descEl.classList.remove("highlight"), 300);
+        }
+
+        // 图片预览功能
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = document.getElementById('preview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 导出数据
+        function exportData() {
+            let loc = document.getElementById("locID").value || "未命名点位";
+            let z = document.getElementById("val_Z").innerText;
+            
+            // 收集所有 slider 的值 (顺序: S1E, S1Q, S1X, S2E...)
+            let values = [];
+            // 按照页面顺序获取所有非Z值的slider
+            const keys = ["S1_E", "S1_Q", "S1_X", "S2_E", "S2_Q", "S2_X", "S3_E", "S3_Q", "S3_X", "S4_E", "S4_Q", "S4_X"];
+            keys.forEach(k => {
+                let val = document.getElementById("val_" + k).innerText;
+                values.push(val); // 保留符号，如 +1
+            });
+
+            // 获取图片名 (模拟)
+            let imgInput = document.getElementById('cameraInput');
+            let imgName = imgInput.files.length > 0 ? "有图片" : "无图片";
+
+            let csvLine = `${loc},${z},${values.join(',')},${imgName}`;
+            
+            navigator.clipboard.writeText(csvLine).then(() => {
+                alert(`✅ 数据已复制!\n\n${csvLine}\n\n请粘贴到Excel。`);
+            }).catch(() => {
+                alert(`❌ 复制失败，请手动记录:\n${csvLine}`);
+            });
+        }
+
+        // 重置表单
+        function resetForm() {
+            if(confirm("确定要重置所有选项吗？")) {
+                document.querySelectorAll('input[type=range]').forEach(i => {
+                    i.value = (i.className === 'z-slider') ? 50 : 0;
+                    i.oninput(); // 触发更新文字
+                });
+                document.getElementById('locID').value = "";
+                document.getElementById('preview').style.display = 'none';
+                document.getElementById('cameraInput').value = "";
+                window.scrollTo(0,0);
+            }
+        }
+    </script>
+</body>
+</html>
